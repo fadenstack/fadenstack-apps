@@ -10,6 +10,10 @@ on:
   push:
     branches: [main]
     paths: [apps.yaml, .github/workflows/app-list.yml]
+  # Every day: the list expires 14 days after it is signed (servers then warn that newer releases may be held
+  # back from them), so it is signed anew daily even when nothing changed.
+  schedule:
+    - cron: "23 4 * * *"
   workflow_dispatch:
 
 permissions:
@@ -83,3 +87,26 @@ jobs:
             out/apps.json out/apps.json.sig "$FEED_DEPLOY_HOST:v1/"
           curl -fsS https://fadenstack.com/updates/v1/apps.json -o live.json
           cmp live.json out/apps.json
+
+  heartbeat:
+    # GitHub switches a public repository's scheduled workflows off after 60 days without activity; the daily
+    # signing would stop, and every server would warn 14 days later. A commit counts as activity: after 45 quiet
+    # days, one empty commit keeps the schedule alive. (Needs pushes to main by github-actions[bot] allowed.)
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Keep the schedule alive
+        shell: bash
+        run: |
+          set -euo pipefail
+          quiet=$(( ($(date +%s) - $(git log -1 --format=%ct)) / 86400 ))
+          if [ "$quiet" -ge 45 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Keep the daily signing of the app list scheduled ($quiet quiet days)"
+            git push
+          fi

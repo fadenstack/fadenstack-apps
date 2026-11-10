@@ -36,6 +36,13 @@ how to connect them.
    release list's);
 3. puts `apps.json` and `apps.json.sig` on fadenstack.com.
 
+The list **expires 14 days after it is signed**, and the workflow signs it anew **every day**, also when nothing
+changed. A server that keeps getting an old list (a stale mirror, a proxy, someone holding a security release back:
+a "freeze attack", in The Update Framework's terms) warns its administrators once the list has expired, and refuses a
+list that arrives already expired. If the daily run fails for two weeks, every server warns: watch the workflow's
+failures. GitHub switches scheduled workflows off after 60 days without activity in a public repository; the job
+`heartbeat` makes an empty commit after 45 quiet days, so pushes to `main` by `github-actions[bot]` must be allowed.
+
 ### Releasing an app
 
 1. Publish the release here (from the app's private repository's release job, or by hand):
