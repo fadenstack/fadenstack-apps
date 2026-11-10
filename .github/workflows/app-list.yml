@@ -35,11 +35,13 @@ jobs:
         with:
           persist-credentials: false
 
+      # Fadenstack's builder at a fixed commit, never a moving branch: this job holds the signing key. Move it
+      # forward when release/update_feed.py or release_feed.py change (c4d707f9: the app list with expiry, PR #111).
       - name: Fadenstack's builder
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: fadenstack/fadenstack
-          ref: main
+          ref: c4d707f92c0fcb7221504c503845f768988a79b9
           path: core
           persist-credentials: false
           sparse-checkout: |

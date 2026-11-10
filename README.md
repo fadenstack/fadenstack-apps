@@ -28,7 +28,7 @@ how to connect them.
 
 `apps.yaml` is the source. On every change to `main`, the workflow `app-list.yml`:
 
-1. checks out Fadenstack's public repository for the builder (`release/update_feed.py`), which refuses anything
+1. checks out Fadenstack's public repository, at a fixed commit, for the builder (`release/update_feed.py`), which refuses anything
    servers would not show: links outside `fadenstack.com`, `github.com/fadenstack/`, the Chrome Web Store and the
    Nextcloud app store, a file without its SHA-256 and size, a pre-release outside the preview channel, a missing
    English text;
@@ -59,8 +59,9 @@ The fields are described at the top of `apps.yaml`.
 - Create this repository on GitHub as **public** (no source in it; release assets of a private repository cannot be
   downloaded by the public).
 - Secrets: `APPS_FEED_SIGNING_KEY` (the private key `apps-2026-11`, base64), and for the upload to fadenstack.com
-  `FEED_DEPLOY_SSH_KEY`, `FEED_DEPLOY_HOST`, `FEED_DEPLOY_KNOWN_HOSTS` (the same restricted key as core's feed job,
-  or a second one limited to the same folder).
+  `FEED_DEPLOY_SSH_KEY` (a key of this repository's own, `apps-feed@github`; on the server it may only write into
+  `/srv/fadenstack/web/sites/updates`: `command="rrsync -wo /srv/fadenstack/web/sites/updates",restrict`),
+  `FEED_DEPLOY_HOST` (`deploy@<server>`), `FEED_DEPLOY_KNOWN_HOSTS` (the server's line from `ssh-keyscan`).
 - The terms of use (EULA), third-party notices and the privacy notice for each app.
 - `SECURITY.md`: the contact for reporting vulnerabilities (Cyber Resilience Act, Art. 14 reporting applies since
   11 September 2026).
